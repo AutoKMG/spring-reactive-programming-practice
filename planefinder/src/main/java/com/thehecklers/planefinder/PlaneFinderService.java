@@ -47,30 +47,28 @@ public class PlaneFinderService {
         } catch (IOException e) {
             System.out.println("\n>>> IO Exception: " + e.getLocalizedMessage() +
                     ", generating and providing sample data.\n");
-            return saveSamplePositions();
+            return repo.deleteAll()
+                    .thenMany(saveSamplePositions());
         }
 
-        if (positions.size() > 0) {
+        if (!positions.isEmpty()) {
             positions.forEach(System.out::println);
 
-            repo.deleteAll();
-            return repo.saveAll(positions);
+            return repo.deleteAll()
+                    .thenMany(repo.saveAll(positions));
         } else {
             System.out.println("\n>>> No positions to report, generating and providing sample data.\n");
-            return saveSamplePositions();
+            return repo.deleteAll()
+                    .thenMany(repo.saveAll(positions));
         }
     }
 
     public Flux<Aircraft> saveSamplePositions() {
         final Random rnd = new Random();
 
-        repo.deleteAll();
-
-        for (int i = 1; i < rnd.nextInt(10); i++) {
-            repo.save(generator.generate());
-        }
-
-        return repo.findAll();
+        return Flux.range(1, rnd.nextInt(10))
+                .map(i -> generator.generate())
+                .flatMap(repo::save);
     }
 }
 

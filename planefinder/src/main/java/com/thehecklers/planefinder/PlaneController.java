@@ -18,6 +18,6 @@ public class PlaneController {
     @ResponseBody
     @GetMapping("/aircraft")
     public Flux<Aircraft> getCurrentAircraft() throws IOException {
-        return pfService.saveSamplePositions();
+        return pfService.getAircraft();
     }
 }
